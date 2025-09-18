@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Интерактивный тест</title>
+  <title>Інтерактивний тест з продажів</title>
   <style>
     :root { --bg:#0b0f19; --panel:#121829; --text:#e6e9f2; --muted:#9aa3b2; --brand:#6ea8fe; --brand-2:#22d3ee; --border:#1f2a44; }
     *{box-sizing:border-box}
@@ -48,7 +48,7 @@
     .fld{display:flex;gap:10px}
     .fld input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0e1526;color:#e6e9f2}
   </style>
-  <!-- Google Identity Services (опционально) -->
+  <!-- Google Identity Services (опціонально) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- SortableJS для order/match -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -58,8 +58,8 @@
     <div class="card" id="app">
       <header>
         <div>
-          <h1>Интерактивный тест</h1>
-          <div class="muted">Вход через Google или укажите рабочую почту. 20 минут на прохождение. Перезапуск запрещён.</div>
+          <h1>Інтерактивний тест</h1>
+          <div class="muted">Вхід через Google або вкажіть робочу пошту. 20 хвилин на проходження. Перезапуск заборонено.</div>
           <div class="progress"><i id="bar"></i></div>
         </div>
         <div id="userBlock" class="signin-wrap">
@@ -69,7 +69,7 @@
                data-auto_prompt="false"></div>
           <div class="g_id_signin" data-type="standard" data-size="medium" data-shape="pill" data-theme="outline" data-logo_alignment="left"></div>
           <div class="fld" id="manualEmail">
-            <input id="emailInput" type="email" placeholder="ваша_почта@company.com" />
+            <input id="emailInput" type="email" placeholder="ваша_пошта@company.com" />
             <button class="btn" id="startBtn">Старт</button>
           </div>
           <span id="emailBadge" class="email-badge hidden"></span>
@@ -80,37 +80,96 @@
       <div class="body" id="stage"></div>
 
       <div class="footer">
-        <div class="muted" id="status">Вопрос 1 из N</div>
+        <div class="muted" id="status">Питання 1 із N</div>
         <div>
-          <button class="btn" id="restartBtn" title="Сброс запрещён" disabled>Сбросить</button>
-          <button class="btn" id="nextBtn" disabled>Далее →</button>
+          <button class="btn" id="restartBtn" title="Скидання заборонено" disabled>Скинути</button>
+          <button class="btn" id="nextBtn" disabled>Далі →</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // -------- Конфиг --------
+    // -------- Конфіг --------
     const QUIZ = {
-      title: "Тест по продажам (10 вопросов)",
+      title: "Тест з продажів (10 питань)",
       durationMin: 20,
       webhookUrl: "https://script.google.com/macros/s/AKfycbz0ZKCEcUj6tMBIvp33L0QFlZMZ8u4R4floJi9FiIwGYOABVLt7zuf_hu50UMYAgcOJ/exec",
       questions: [
-        { type:'order',   text:'Расположите этапы продаж в верном порядке', items:[
-          'Follow-up','Работа с возражениями','Открытие контакта','Закрытие сделки','Презентация решения','Выявление потребностей'] },
-        { type:'single',  text:'Какой лучший первый вопрос в холодном звонке?', options:['Вам сейчас удобно говорить 2 минуты?','Правильно ли я набрал номер [Имя Фамилия]?','У нас супер-предложение, расскажу?','Сколько вы зарабатываете?'] },
-        { type:'single',  text:'Цель этапа «выявление потребностей» —', options:['Представить фичи','Сразу закрыть','Сбить возражения','Понять задачи/критерии успеха клиента'] },
-        { type:'single',  text:'«Следующая договорённость» — это…', options:['Конкретное время и формат следующего шага','Поболтаем позже','Клиент сам напишет','Отправить прайс без обсуждения'] },
-        { type:'single',  text:'Как корректно обработать «дорого»?', options:['Сразу дать скидку','Спорить о цене','Уточнить, с чем сравнивают, и вернуть к ценности','Завершить разговор'] },
-        { type:'single',  text:'Критерий хорошей квалификации лида:', options:['Длина разговора','BANT/CHAMP по фактам','Настроение клиента','Сложность продукта'] },
-        { type:'single',  text:'Перед демо важно…', options:['Подтвердить критерии успеха и сценарий демо','Попросить больше времени','Отправить инструкцию по оплате','Сразу показывать'] },
-        { type:'single',  text:'Как лучше зафиксировать следующую встречу?', options:['Попросить написать когда удобно','Отправить PDF','Слать инвайт-календарь с повесткой','Ждать инициативы клиента'] },
-        { type:'match',   text:'Соотнесите термины и определения', left:['Лид','SQL','Upsell','Cross-sell'], right:['Неподогретый контакт','Квалифицирован на продажу','Допродажа более дорогого тарифа','Допродажа сопутствующего продукта'] },
-        { type:'match',   text:'Соотнесите этапы SPIN и цели', left:['SPIN: Situation','SPIN: Problem','SPIN: Implication','SPIN: Need-Payoff'], right:['Выясняем факты текущего положения','Уточняем сложности/боли','Показываем цену бездействия','Формируем ценность решения'] }
+        // 1) Упорядкування — базова структура продажу
+        { type:'order', text:'Розташуйте етапи базової структури продажу у правильному порядку', items:[
+          'Закриття','Презентація','Робота із запереченнями','Збір інформації','Зустріч-привітання','Follow-up'
+        ]},
+        // 2) Один вибір
+        { type:'single', text:'Головна мета етапу «Зустріч-привітання»', options:[
+          'Одразу перейти до ціни',
+          'Створити позитивне перше враження та довіру',
+          'Перевірити сімейний стан',
+          'Попросити рекомендації'
+        ]},
+        // 3) Множинний вибір — активне слухання
+        { type:'multiple', text:'Що входить в активне слухання? Відміть усі правильні варіанти', options:[
+          'Перефразування відповідей клієнта',
+          'Уточнюючі запитання',
+          'Підсумкове резюме перед переходом далі',
+          'Ігнорування деталей заради темпу дзвінка'
+        ]},
+        // 4) Упорядкування — блоки збору інформації
+        { type:'order', text:'Правильна послідовність блоків «збору інформації»', items:[
+          'Потреба','Робота','Проблема','Підсумки/резюме','Досвід','Реєстрація/первинний інтерес','Сім’я'
+        ]},
+        // 5) Один вибір — що таке заперечення
+        { type:'single', text:'Що таке «заперечення» в контексті продажів?', options:[
+          'Остаточна відмова',
+          'Природна реакція сумніву/страху/недовіри, шанс пояснити й посилити довіру',
+          'Претензія щодо якості',
+          'Запит на знижку'
+        ]},
+        // 6) Відповідність — категорії заперечень
+        { type:'match', text:'Співвіднесіть категорії заперечень і підхід до опрацювання', left:[
+          'Справжні',
+          'Хибні (відмовки)',
+          'Стартові бар’єри'
+        ], right:[
+          'Вивести запитаннями на справжню причину',
+          'Коротко пояснити з вигодою і запропонувати наступний крок',
+          'Вислухати → уточнити → аргументувати → закрити кроком'
+        ]},
+        // 7) Один вибір — крок після «Вислухати»
+        { type:'single', text:'Який крок іде одразу після «Вислухати» в структурі опрацювання заперечень?', options:[
+          'Частково погодитися (емпатія)',
+          'Закриття',
+          'Презентація',
+          'Пропозиція знижки'
+        ]},
+        // 8) Один вибір — що важливо у презентації
+        { type:'single', text:'Що критично важливо на етапі «Презентація»?', options:[
+          'Перелічити всі функції продукту підряд',
+          'Показати цінність під конкретні потреби клієнта',
+          'Запитати «коли оплачуєте?»',
+          'Обійти запитання клієнта'
+        ]},
+        // 9) Один вибір — як знизити недовіру
+        { type:'single', text:'Клієнт висловлює недовіру. Що найкраще допомагає зменшити її?', options:[
+          'Тиск «потрібно вирішити зараз»',
+          'Особиста прозорість: розповідь про себе/команду/досвід і результати',
+          'Ігнорування заперечення',
+          'Термінова акція «лише сьогодні»'
+        ]},
+        // 10) Відповідність — тембр голосу та ефект
+        { type:'match', text:'Підберіть тембр голосу до ефекту', left:[
+          'Тихий',
+          'Середній',
+          'Гучний'
+        ], right:[
+          'Довіра, конфіденційність',
+          'Нейтральний щоденний діалог',
+          'Енергія, акцент на важливому'
+        ]}
       ]
     };
 
-    // -------- Глобалы/DOM --------
+    // -------- Глобал/DOM --------
     const stage = document.getElementById('stage');
     const nextBtn = document.getElementById('nextBtn');
     const restartBtn = document.getElementById('restartBtn');
@@ -127,14 +186,14 @@
     let idx = 0;
     let answers = []; // [{index, type, picked}]
 
-    // -------- Вход: Google или вручную --------
+    // -------- Вхід: Google або вручну --------
     window.handleCredentialResponse = function(res){
       try { const payload = parseJwt(res.credential); const email = payload.email; if(!email) throw new Error(); lockAndStart(email); }
-      catch(e){ alert('Ошибка входа через Google. Можно указать почту вручную.'); }
+      catch(e){ alert('Помилка входу через Google. Можна вказати пошту вручну.'); }
     };
     startBtn.addEventListener('click', () => {
       const email = (emailInput.value||'').trim();
-      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Укажите корректную рабочую почту'); return; }
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Укажіть коректну робочу пошту'); return; }
       lockAndStart(email);
     });
 
@@ -144,7 +203,7 @@
       const existingEmail = localStorage.getItem(LS.email);
       const endTs = +localStorage.getItem(LS.end) || 0;
       const now = Date.now();
-      if(existingEmail && endTs && now < endTs && existingEmail !== email){ alert('Тест уже запущен под другим аккаунтом и не может быть сброшен до конца времени.'); return; }
+      if(existingEmail && endTs && now < endTs && existingEmail !== email){ alert('Тест уже запущено під іншим аккаунтом і не може бути скинуто до завершення часу.'); return; }
       localStorage.setItem(LS.email, email);
       emailBadge.textContent = email; emailBadge.classList.remove('hidden');
       document.querySelector('.g_id_signin')?.classList.add('hidden');
@@ -177,13 +236,13 @@
         tickTimer();
         render();
       } else {
-        stage.innerHTML = '<div class="warning">Войдите через Google или укажите рабочую почту, чтобы начать. После старта таймер запустится на 20 минут, а сброс будет недоступен.</div>';
-        statusEl.textContent = 'Авторизуйтесь, чтобы начать';
+        stage.innerHTML = '<div class="warning">Увійдіть через Google або вкажіть робочу пошту, щоб почати. Після старту таймер запуститься на 20 хвилин, а скидання буде недоступне.</div>';
+        statusEl.textContent = 'Авторизуйтеся, щоб почати';
       }
     })();
 
     // -------- Рендер --------
-    function updateProgress(){ const total = order.length; statusEl.textContent = `Вопрос ${Math.min(idx+1,total)} из ${total}`; bar.style.width = `${(idx/total)*100}%`; }
+    function updateProgress(){ const total = order.length; statusEl.textContent = `Питання ${Math.min(idx+1,total)} із ${total}`; bar.style.width = `${(idx/total)*100}%`; }
 
     function render(){
       updateProgress(); nextBtn.disabled = true; stage.innerHTML = '';
@@ -192,13 +251,23 @@
       const block = document.createElement('div');
       const h = document.createElement('h2'); h.className='q-title'; h.textContent = q.text; block.appendChild(h);
       const note = document.createElement('div'); note.className='q-note muted';
-      note.textContent = q.type==='match' ? 'Перетащите карточки справа в соответствующие слоты слева' : (q.type==='order' ? 'Перетащите пункты, чтобы выставить порядок' : 'Выберите один вариант');
+      note.textContent =
+        q.type==='match' ? 'Перетягніть картки праворуч у відповідні слоти ліворуч' :
+        q.type==='order' ? 'Перетягніть пункти, щоб виставити порядок' :
+        q.type==='multiple' ? 'Можна обрати кілька варіантів' :
+        'Оберіть один варіант';
       block.appendChild(note);
 
       const options = document.createElement('div'); options.className='options';
 
-      if(q.type==='single'){
-        q.options.forEach((opt,i)=>{ const label=document.createElement('label'); label.className='opt'; const input=document.createElement('input'); input.type='radio'; input.name='q'; input.value=i; const span=document.createElement('span'); span.textContent=opt; label.appendChild(input); label.appendChild(span); options.appendChild(label); });
+      if(q.type==='single' || q.type==='multiple'){
+        const isMulti = q.type==='multiple';
+        q.options.forEach((opt,i)=>{
+          const label=document.createElement('label'); label.className='opt';
+          const input=document.createElement('input'); input.type=isMulti?'checkbox':'radio'; input.name='q'; input.value=i;
+          const span=document.createElement('span'); span.textContent=opt;
+          label.appendChild(input); label.appendChild(span); options.appendChild(label);
+        });
       }
       if(q.type==='order'){
         const list = document.createElement('div'); list.id='orderList'; list.className='options';
@@ -218,14 +287,25 @@
 
       block.appendChild(options); stage.appendChild(block);
 
-      if(q.type==='single'){ options.addEventListener('change', ()=>{ nextBtn.disabled = !options.querySelector('input:checked'); }); }
-      if(q.type==='order' || q.type==='match'){ nextBtn.disabled = false; }
+      if(q.type==='single'){
+        options.addEventListener('change', ()=>{ nextBtn.disabled = !options.querySelector('input:checked'); });
+      } else if(q.type==='multiple'){
+        options.addEventListener('change', ()=>{
+          const anyChecked = options.querySelectorAll('input:checked').length>0;
+          nextBtn.disabled = !anyChecked;
+        });
+      } else {
+        // order / match — можна рухатися далі без дод. перевірок
+        nextBtn.disabled = false;
+      }
 
       nextBtn.onclick = () => saveAndNext(); restartBtn.onclick = () => {};
       function saveAndNext(){
         let picked;
         if(q.type==='single'){
           const sel = options.querySelector('input:checked'); picked = sel ? [ +sel.value ] : [];
+        } else if(q.type==='multiple'){
+          picked = [...options.querySelectorAll('input:checked')].map(i=>+i.value);
         } else if(q.type==='order'){
           picked = Array.from(options.querySelectorAll('#orderList .draggable')).map(el=>el.textContent);
         } else if(q.type==='match'){
@@ -236,34 +316,34 @@
       }
     }
 
-    // -------- Результат (оцениваем на сервере, ключи скрыты) --------
+    // -------- Результат (оцінка на сервері, ключі приховано) --------
     async function renderResult(){
       bar.style.width = '100%';
       const payload = buildPayload();
-      stage.innerHTML = `<h2>Отправка результата…</h2><div class="muted">Пожалуйста, не закрывайте страницу.</div>`;
+      stage.innerHTML = `<h2>Надсилання результату…</h2><div class="muted">Будь ласка, не закривайте сторінку.</div>`;
       try {
-        // ВАЖНО: простой запрос без preflight → text/plain
+        // простий запит без preflight → text/plain
         const rsp = await fetch(QUIZ.webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
         const data = await rsp.json();
-        if(!data.ok) throw new Error(data.error||'Ошибка сервера');
+        if(!data.ok) throw new Error(data.error||'Помилка сервера');
         const { total, percent, breakdown } = data;
         stage.innerHTML = `
-          <h2>Результат отправлен</h2>
-          <div class="muted">Спасибо! Итоги сохранены. Мы отправили ваши ответы организатору на email.</div>
+          <h2>Результат надіслано</h2>
+          <div class="muted">Дякуємо! Підсумки збережено. Ми відправили ваші відповіді організатору на email.</div>
           <div class="kpis">
-            <div class="kpi"><b>${total}/10</b><div class="muted">Баллы</div></div>
-            <div class="kpi"><b>${percent}%</b><div class="muted">Процент</div></div>
-            <div class="kpi"><b>${timeTaken()}</b><div class="muted">Время</div></div>
+            <div class="kpi"><b>${total}/10</b><div class="muted">Балів</div></div>
+            <div class="kpi"><b>${percent}%</b><div class="muted">Відсоток</div></div>
+            <div class="kpi"><b>${timeTaken()}</b><div class="muted">Час</div></div>
           </div>
           <table class="table"><thead><tr><th>#</th><th>Тип</th><th>Статус</th></tr></thead><tbody id="rows"></tbody></table>
-          <div class="warning">Тест заблокирован — перезапуск невозможен до истечения таймера.</div>`;
+          <div class="warning">Тест заблоковано — перезапуск неможливий до завершення таймера.</div>`;
         const rows = document.getElementById('rows');
-        breakdown.forEach((b,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${b.id}</td><td>${b.ok?'<span class="pill ok">верно</span>':'<span class="pill bad">ошибка</span>'}</td>`; rows.appendChild(tr); });
-      } catch(err){ stage.innerHTML = `<h2>Не удалось отправить</h2><div class="muted">${err.message}</div><div class="warning">Свяжитесь с руководителем и сообщите о проблеме.</div>`; }
+        breakdown.forEach((b,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${b.id}</td><td>${b.ok?'<span class="pill ok">вірно</span>':'<span class="pill bad">помилка</span>'}</td>`; rows.appendChild(tr); });
+      } catch(err){ stage.innerHTML = `<h2>Не вдалося надіслати</h2><div class="muted">${err.message}</div><div class="warning">Зв’яжіться з керівником і повідомте про проблему.</div>`; }
     }
 
     function buildPayload(){
@@ -276,6 +356,11 @@
         if(rec.type==='single'){
           const letter = rec.picked && rec.picked.length ? alpha[rec.picked[0]] : '';
           return { id:`q${rec.index+1}`, type:'single', value:letter };
+        }
+        if(rec.type==='multiple'){
+          // Надішлемо літери вибраних варіантів
+          const letters = (rec.picked||[]).map(i=>alpha[i]);
+          return { id:`q${rec.index+1}`, type:'multiple', value:letters };
         }
         if(rec.type==='order'){
           return { id:`q${rec.index+1}`, type:'order', value:rec.picked };
