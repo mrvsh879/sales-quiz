@@ -46,7 +46,7 @@
     .draggable{padding:10px 12px;background:#121a33;border:1px solid #2a3553;border-radius:10px;cursor:grab}
     .row{display:grid;gap:10px;margin:12px 0}
     .fld{display:flex;gap:10px}
-    .fld input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0e1526;color:var(--text)}
+    .fld input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0e1526;color:#e6e9f2}
   </style>
   <!-- Google Identity Services (опционально) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -222,7 +222,6 @@
       if(q.type==='order' || q.type==='match'){ nextBtn.disabled = false; }
 
       nextBtn.onclick = () => saveAndNext(); restartBtn.onclick = () => {};
-
       function saveAndNext(){
         let picked;
         if(q.type==='single'){
@@ -243,7 +242,12 @@
       const payload = buildPayload();
       stage.innerHTML = `<h2>Отправка результата…</h2><div class="muted">Пожалуйста, не закрывайте страницу.</div>`;
       try {
-        const rsp = await fetch(QUIZ.webhookUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        // ВАЖНО: простой запрос без preflight → text/plain
+        const rsp = await fetch(QUIZ.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
         const data = await rsp.json();
         if(!data.ok) throw new Error(data.error||'Ошибка сервера');
         const { total, percent, breakdown } = data;
@@ -266,7 +270,6 @@
       const email = localStorage.getItem(LS.email);
       const startedAt = +localStorage.getItem(LS.start) || Date.now();
       const finishedAt = Date.now();
-      // Нормализуем выбор single → буквы a/b/c/d для сервера
       const alpha = ['a','b','c','d','e','f'];
       const normalized = answers.map(rec=>{
         const q = QUIZ.questions[rec.index];
@@ -275,10 +278,10 @@
           return { id:`q${rec.index+1}`, type:'single', value:letter };
         }
         if(rec.type==='order'){
-          return { id:`q${rec.index+1}`, type:'order', value:rec.picked }; // массив строк
+          return { id:`q${rec.index+1}`, type:'order', value:rec.picked };
         }
         if(rec.type==='match'){
-          return { id:`q${rec.index+1}`, type:'match', value:rec.picked }; // объект left->right
+          return { id:`q${rec.index+1}`, type:'match', value:rec.picked };
         }
         return { id:`q${rec.index+1}`, type:rec.type, value:rec.picked };
       });
