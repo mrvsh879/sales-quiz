@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Интерактивный тест</title>
+  <style>
+    :root { --bg:#0b0f19; --panel:#121829; --text:#e6e9f2; --muted:#9aa3b2; --brand:#6ea8fe; --brand-2:#22d3ee; --border:#1f2a44; }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 600px at 10% -10%, rgba(34,211,238,.08), transparent),
+                     radial-gradient(1200px 600px at 90% 110%, rgba(110,168,254,.08), transparent),var(--bg);
+         color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;line-height:1.6}
+    .wrap{max-width:900px;margin:40px auto;padding:24px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid var(--border);
+          backdrop-filter:blur(8px);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.35);overflow:hidden}
+    header{padding:22px 22px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    h1{font-size:22px;margin:0;letter-spacing:.2px}
+    .muted{color:var(--muted);font-size:14px}
+    .progress{width:100%;height:8px;background:#0e1526;border:1px solid var(--border);border-radius:999px;overflow:hidden;margin:8px 0 0}
+    .progress>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+    .body{padding:22px}
+    .q-title{font-size:20px;font-weight:700;margin:0 0 8px}
+    .q-note{margin:0 0 16px;color:var(--muted)}
+    .options{display:grid;gap:12px}
+    .opt{border:1px solid var(--border);border-radius:14px;padding:14px;background:#0e1526;display:flex;align-items:center;gap:12px}
+    .opt input{width:18px;height:18px;accent-color:var(--brand)}
+    .btn{appearance:none;border:1px solid var(--border);color:var(--text);background:linear-gradient(180deg,#1a2340,#15203b);
+         padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:opacity .2s ease}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--muted)}
+    .hidden{display:none !important}
+    .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+    .kpi{text-align:center;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0e1526}
+    .kpi b{font-size:20px;display:block}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
+    .pill.ok{background:rgba(34,197,94,.15);color:#86efac}
+    .pill.bad{background:rgba(239,68,68,.15);color:#fca5a5}
+    .timer{margin-left:auto;font-weight:700}
+    .email-badge{margin-left:auto;background:#0e1526;border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px}
+    .signin-wrap{display:flex;align-items:center;gap:12px}
+    .warning{background:rgba(255,255,255,.03);border:1px dashed var(--border);padding:10px 12px;border-radius:12px;margin-top:10px;font-size:13px;color:var(--muted)}
+    .two-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .slot{background:#0e1526;border:1px dashed #2a3553;border-radius:10px;min-height:44px;display:flex;align-items:center;padding:8px}
+    .draggable{padding:10px 12px;background:#121a33;border:1px solid #2a3553;border-radius:10px;cursor:grab}
+    .row{display:grid;gap:10px;margin:12px 0}
+    .fld{display:flex;gap:10px}
+    .fld input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0e1526;color:var(--text)}
+  </style>
+  <!-- Google Identity Services (опционально) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- SortableJS для order/match -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="app">
+      <header>
+        <div>
+          <h1>Интерактивный тест</h1>
+          <div class="muted">Вход через Google или укажите рабочую почту. 20 минут на прохождение. Перезапуск запрещён.</div>
+          <div class="progress"><i id="bar"></i></div>
+        </div>
+        <div id="userBlock" class="signin-wrap">
+          <div id="g_id_onload"
+               data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+               data-callback="handleCredentialResponse"
+               data-auto_prompt="false"></div>
+          <div class="g_id_signin" data-type="standard" data-size="medium" data-shape="pill" data-theme="outline" data-logo_alignment="left"></div>
+          <div class="fld" id="manualEmail">
+            <input id="emailInput" type="email" placeholder="ваша_почта@company.com" />
+            <button class="btn" id="startBtn">Старт</button>
+          </div>
+          <span id="emailBadge" class="email-badge hidden"></span>
+          <span id="timer" class="timer hidden">20:00</span>
+        </div>
+      </header>
+
+      <div class="body" id="stage"></div>
+
+      <div class="footer">
+        <div class="muted" id="status">Вопрос 1 из N</div>
+        <div>
+          <button class="btn" id="restartBtn" title="Сброс запрещён" disabled>Сбросить</button>
+          <button class="btn" id="nextBtn" disabled>Далее →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------- Конфиг --------
+    const QUIZ = {
+      title: "Тест по продажам (10 вопросов)",
+      durationMin: 20,
+      webhookUrl: "https://script.google.com/macros/s/AKfycbz0ZKCEcUj6tMBIvp33L0QFlZMZ8u4R4floJi9FiIwGYOABVLt7zuf_hu50UMYAgcOJ/exec",
+      questions: [
+        { type:'order',   text:'Расположите этапы продаж в верном порядке', items:[
+          'Follow-up','Работа с возражениями','Открытие контакта','Закрытие сделки','Презентация решения','Выявление потребностей'] },
+        { type:'single',  text:'Какой лучший первый вопрос в холодном звонке?', options:['Вам сейчас удобно говорить 2 минуты?','Правильно ли я набрал номер [Имя Фамилия]?','У нас супер-предложение, расскажу?','Сколько вы зарабатываете?'] },
+        { type:'single',  text:'Цель этапа «выявление потребностей» —', options:['Представить фичи','Сразу закрыть','Сбить возражения','Понять задачи/критерии успеха клиента'] },
+        { type:'single',  text:'«Следующая договорённость» — это…', options:['Конкретное время и формат следующего шага','Поболтаем позже','Клиент сам напишет','Отправить прайс без обсуждения'] },
+        { type:'single',  text:'Как корректно обработать «дорого»?', options:['Сразу дать скидку','Спорить о цене','Уточнить, с чем сравнивают, и вернуть к ценности','Завершить разговор'] },
+        { type:'single',  text:'Критерий хорошей квалификации лида:', options:['Длина разговора','BANT/CHAMP по фактам','Настроение клиента','Сложность продукта'] },
+        { type:'single',  text:'Перед демо важно…', options:['Подтвердить критерии успеха и сценарий демо','Попросить больше времени','Отправить инструкцию по оплате','Сразу показывать'] },
+        { type:'single',  text:'Как лучше зафиксировать следующую встречу?', options:['Попросить написать когда удобно','Отправить PDF','Слать инвайт-календарь с повесткой','Ждать инициативы клиента'] },
+        { type:'match',   text:'Соотнесите термины и определения', left:['Лид','SQL','Upsell','Cross-sell'], right:['Неподогретый контакт','Квалифицирован на продажу','Допродажа более дорогого тарифа','Допродажа сопутствующего продукта'] },
+        { type:'match',   text:'Соотнесите этапы SPIN и цели', left:['SPIN: Situation','SPIN: Problem','SPIN: Implication','SPIN: Need-Payoff'], right:['Выясняем факты текущего положения','Уточняем сложности/боли','Показываем цену бездействия','Формируем ценность решения'] }
+      ]
+    };
+
+    // -------- Глобалы/DOM --------
+    const stage = document.getElementById('stage');
+    const nextBtn = document.getElementById('nextBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const statusEl = document.getElementById('status');
+    const bar = document.getElementById('bar');
+    const emailBadge = document.getElementById('emailBadge');
+    const timerEl = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
+    const emailInput = document.getElementById('emailInput');
+
+    const LS = { email:'quiz_user_email', end:'quiz_end_ts', idx:'quiz_idx', data:'quiz_answers', start:'quiz_start_ts' };
+
+    let order = [...Array(QUIZ.questions.length).keys()];
+    let idx = 0;
+    let answers = []; // [{index, type, picked}]
+
+    // -------- Вход: Google или вручную --------
+    window.handleCredentialResponse = function(res){
+      try { const payload = parseJwt(res.credential); const email = payload.email; if(!email) throw new Error(); lockAndStart(email); }
+      catch(e){ alert('Ошибка входа через Google. Можно указать почту вручную.'); }
+    };
+    startBtn.addEventListener('click', () => {
+      const email = (emailInput.value||'').trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Укажите корректную рабочую почту'); return; }
+      lockAndStart(email);
+    });
+
+    function parseJwt(token){ const base64Url = token.split('.')[1]; const base64 = base64Url.replace(/-/g,'+').replace(/_/g,'/'); const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); return JSON.parse(json); }
+
+    function lockAndStart(email){
+      const existingEmail = localStorage.getItem(LS.email);
+      const endTs = +localStorage.getItem(LS.end) || 0;
+      const now = Date.now();
+      if(existingEmail && endTs && now < endTs && existingEmail !== email){ alert('Тест уже запущен под другим аккаунтом и не может быть сброшен до конца времени.'); return; }
+      localStorage.setItem(LS.email, email);
+      emailBadge.textContent = email; emailBadge.classList.remove('hidden');
+      document.querySelector('.g_id_signin')?.classList.add('hidden');
+      document.getElementById('manualEmail')?.classList.add('hidden');
+
+      if(!localStorage.getItem(LS.end)){
+        const end = now + QUIZ.durationMin*60*1000;
+        localStorage.setItem(LS.end, String(end));
+        localStorage.setItem(LS.start, String(now));
+        localStorage.setItem(LS.idx, '0');
+        localStorage.setItem(LS.data, JSON.stringify([]));
+      }
+      idx = +(localStorage.getItem(LS.idx) || '0');
+      answers = JSON.parse(localStorage.getItem(LS.data) || '[]');
+      timerEl.classList.remove('hidden');
+      tickTimer();
+      render();
+    }
+
+    (function bootstrap(){
+      const email = localStorage.getItem(LS.email);
+      const endTs = +localStorage.getItem(LS.end) || 0;
+      if(email && endTs){
+        emailBadge.textContent = email; emailBadge.classList.remove('hidden');
+        document.querySelector('.g_id_signin')?.classList.add('hidden');
+        document.getElementById('manualEmail')?.classList.add('hidden');
+        timerEl.classList.remove('hidden');
+        idx = +(localStorage.getItem(LS.idx) || '0');
+        answers = JSON.parse(localStorage.getItem(LS.data) || '[]');
+        tickTimer();
+        render();
+      } else {
+        stage.innerHTML = '<div class="warning">Войдите через Google или укажите рабочую почту, чтобы начать. После старта таймер запустится на 20 минут, а сброс будет недоступен.</div>';
+        statusEl.textContent = 'Авторизуйтесь, чтобы начать';
+      }
+    })();
+
+    // -------- Рендер --------
+    function updateProgress(){ const total = order.length; statusEl.textContent = `Вопрос ${Math.min(idx+1,total)} из ${total}`; bar.style.width = `${(idx/total)*100}%`; }
+
+    function render(){
+      updateProgress(); nextBtn.disabled = true; stage.innerHTML = '';
+      if(idx >= order.length){ return renderResult(); }
+      const q = QUIZ.questions[order[idx]];
+      const block = document.createElement('div');
+      const h = document.createElement('h2'); h.className='q-title'; h.textContent = q.text; block.appendChild(h);
+      const note = document.createElement('div'); note.className='q-note muted';
+      note.textContent = q.type==='match' ? 'Перетащите карточки справа в соответствующие слоты слева' : (q.type==='order' ? 'Перетащите пункты, чтобы выставить порядок' : 'Выберите один вариант');
+      block.appendChild(note);
+
+      const options = document.createElement('div'); options.className='options';
+
+      if(q.type==='single'){
+        q.options.forEach((opt,i)=>{ const label=document.createElement('label'); label.className='opt'; const input=document.createElement('input'); input.type='radio'; input.name='q'; input.value=i; const span=document.createElement('span'); span.textContent=opt; label.appendChild(input); label.appendChild(span); options.appendChild(label); });
+      }
+      if(q.type==='order'){
+        const list = document.createElement('div'); list.id='orderList'; list.className='options';
+        q.items.forEach(txt=>{ const d=document.createElement('div'); d.className='draggable'; d.textContent=txt; list.appendChild(d); });
+        options.appendChild(list); new Sortable(list,{animation:150});
+      }
+      if(q.type==='match'){
+        const wrap = document.createElement('div'); wrap.className='two-cols';
+        const leftCol = document.createElement('div'); const rightCol = document.createElement('div');
+        q.left.forEach(l=>{ const slot=document.createElement('div'); slot.className='slot'; slot.setAttribute('data-left',l); slot.textContent=l+' — '; leftCol.appendChild(slot); });
+        const pool=document.createElement('div'); pool.id='matchPool'; pool.className='options';
+        q.right.forEach(r=>{ const it=document.createElement('div'); it.className='draggable'; it.textContent=r; it.setAttribute('data-right',r); pool.appendChild(it); });
+        rightCol.appendChild(pool); wrap.appendChild(leftCol); wrap.appendChild(rightCol); options.appendChild(wrap);
+        new Sortable(pool,{group:'m',animation:150});
+        leftCol.querySelectorAll('.slot').forEach(s=>{ new Sortable(s,{group:'m',animation:150,put:true,sort:true}); });
+      }
+
+      block.appendChild(options); stage.appendChild(block);
+
+      if(q.type==='single'){ options.addEventListener('change', ()=>{ nextBtn.disabled = !options.querySelector('input:checked'); }); }
+      if(q.type==='order' || q.type==='match'){ nextBtn.disabled = false; }
+
+      nextBtn.onclick = () => saveAndNext(); restartBtn.onclick = () => {};
+
+      function saveAndNext(){
+        let picked;
+        if(q.type==='single'){
+          const sel = options.querySelector('input:checked'); picked = sel ? [ +sel.value ] : [];
+        } else if(q.type==='order'){
+          picked = Array.from(options.querySelectorAll('#orderList .draggable')).map(el=>el.textContent);
+        } else if(q.type==='match'){
+          picked = {}; options.querySelectorAll('.slot').forEach(slot=>{ const l=slot.getAttribute('data-left'); const it=slot.querySelector('.draggable'); picked[l] = it ? it.getAttribute('data-right') : ''; });
+        }
+        const record = { index: order[idx], type: q.type, picked };
+        answers[idx] = record; localStorage.setItem(LS.data, JSON.stringify(answers)); idx++; localStorage.setItem(LS.idx, String(idx)); render();
+      }
+    }
+
+    // -------- Результат (оцениваем на сервере, ключи скрыты) --------
+    async function renderResult(){
+      bar.style.width = '100%';
+      const payload = buildPayload();
+      stage.innerHTML = `<h2>Отправка результата…</h2><div class="muted">Пожалуйста, не закрывайте страницу.</div>`;
+      try {
+        const rsp = await fetch(QUIZ.webhookUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const data = await rsp.json();
+        if(!data.ok) throw new Error(data.error||'Ошибка сервера');
+        const { total, percent, breakdown } = data;
+        stage.innerHTML = `
+          <h2>Результат отправлен</h2>
+          <div class="muted">Спасибо! Итоги сохранены. Мы отправили ваши ответы организатору на email.</div>
+          <div class="kpis">
+            <div class="kpi"><b>${total}/10</b><div class="muted">Баллы</div></div>
+            <div class="kpi"><b>${percent}%</b><div class="muted">Процент</div></div>
+            <div class="kpi"><b>${timeTaken()}</b><div class="muted">Время</div></div>
+          </div>
+          <table class="table"><thead><tr><th>#</th><th>Тип</th><th>Статус</th></tr></thead><tbody id="rows"></tbody></table>
+          <div class="warning">Тест заблокирован — перезапуск невозможен до истечения таймера.</div>`;
+        const rows = document.getElementById('rows');
+        breakdown.forEach((b,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${b.id}</td><td>${b.ok?'<span class="pill ok">верно</span>':'<span class="pill bad">ошибка</span>'}</td>`; rows.appendChild(tr); });
+      } catch(err){ stage.innerHTML = `<h2>Не удалось отправить</h2><div class="muted">${err.message}</div><div class="warning">Свяжитесь с руководителем и сообщите о проблеме.</div>`; }
+    }
+
+    function buildPayload(){
+      const email = localStorage.getItem(LS.email);
+      const startedAt = +localStorage.getItem(LS.start) || Date.now();
+      const finishedAt = Date.now();
+      // Нормализуем выбор single → буквы a/b/c/d для сервера
+      const alpha = ['a','b','c','d','e','f'];
+      const normalized = answers.map(rec=>{
+        const q = QUIZ.questions[rec.index];
+        if(rec.type==='single'){
+          const letter = rec.picked && rec.picked.length ? alpha[rec.picked[0]] : '';
+          return { id:`q${rec.index+1}`, type:'single', value:letter };
+        }
+        if(rec.type==='order'){
+          return { id:`q${rec.index+1}`, type:'order', value:rec.picked }; // массив строк
+        }
+        if(rec.type==='match'){
+          return { id:`q${rec.index+1}`, type:'match', value:rec.picked }; // объект left->right
+        }
+        return { id:`q${rec.index+1}`, type:rec.type, value:rec.picked };
+      });
+      return { title:QUIZ.title, email, startedAt, finishedAt, durationMin:QUIZ.durationMin, answers:normalized, ua:navigator.userAgent };
+    }
+
+    // -------- Таймер --------
+    function tickTimer(){ const end = +localStorage.getItem(LS.end) || 0; if(!end) return; const left = Math.max(0, end - Date.now()); const mm = String(Math.floor(left/60000)).padStart(2,'0'); const ss = String(Math.floor((left%60000)/1000)).padStart(2,'0'); timerEl.textContent = `${mm}:${ss}`; if(left<=0){ idx = order.length; localStorage.setItem(LS.idx, String(idx)); render(); return; } setTimeout(tickTimer, 250); }
+    function timeTaken(){ const start = +localStorage.getItem(LS.start) || Date.now(); const s = Math.max(0, Math.floor((Date.now()-start)/1000)); const mm = String(Math.floor(s/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0'); return `${mm}:${ss}`; }
+  </script>
+</body>
+</html>
