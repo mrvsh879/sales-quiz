@@ -96,71 +96,54 @@
       durationMin: 20,
       webhookUrl: "https://script.google.com/macros/s/AKfycbz0ZKCEcUj6tMBIvp33L0QFlZMZ8u4R4floJi9FiIwGYOABVLt7zuf_hu50UMYAgcOJ/exec",
       questions: [
-        // 1) Упорядкування — базова структура продажу
         { type:'order', text:'Розташуйте етапи базової структури продажу у правильному порядку', items:[
           'Закриття','Презентація','Робота із запереченнями','Збір інформації','Зустріч-привітання','Follow-up'
         ]},
-        // 2) Один вибір
         { type:'single', text:'Головна мета етапу «Зустріч-привітання»', options:[
           'Одразу перейти до ціни',
           'Створити позитивне перше враження та довіру',
           'Перевірити сімейний стан',
           'Попросити рекомендації'
         ]},
-        // 3) Множинний вибір — активне слухання
         { type:'multiple', text:'Що входить в активне слухання? Відміть усі правильні варіанти', options:[
           'Перефразування відповідей клієнта',
           'Уточнюючі запитання',
           'Підсумкове резюме перед переходом далі',
           'Ігнорування деталей заради темпу дзвінка'
         ]},
-        // 4) Упорядкування — блоки збору інформації
         { type:'order', text:'Правильна послідовність блоків «збору інформації»', items:[
           'Потреба','Робота','Проблема','Підсумки/резюме','Досвід','Реєстрація/первинний інтерес','Сім’я'
         ]},
-        // 5) Один вибір — що таке заперечення
         { type:'single', text:'Що таке «заперечення» в контексті продажів?', options:[
           'Остаточна відмова',
           'Природна реакція сумніву/страху/недовіри, шанс пояснити й посилити довіру',
           'Претензія щодо якості',
           'Запит на знижку'
         ]},
-        // 6) Відповідність — категорії заперечень
         { type:'match', text:'Співвіднесіть категорії заперечень і підхід до опрацювання', left:[
-          'Справжні',
-          'Хибні (відмовки)',
-          'Стартові бар’єри'
+          'Справжні','Хибні (відмовки)','Стартові бар’єри'
         ], right:[
           'Вивести запитаннями на справжню причину',
           'Коротко пояснити з вигодою і запропонувати наступний крок',
           'Вислухати → уточнити → аргументувати → закрити кроком'
         ]},
-        // 7) Один вибір — крок після «Вислухати»
         { type:'single', text:'Який крок іде одразу після «Вислухати» в структурі опрацювання заперечень?', options:[
-          'Частково погодитися (емпатія)',
-          'Закриття',
-          'Презентація',
-          'Пропозиція знижки'
+          'Частково погодитися (емпатія)','Закриття','Презентація','Пропозиція знижки'
         ]},
-        // 8) Один вибір — що важливо у презентації
         { type:'single', text:'Що критично важливо на етапі «Презентація»?', options:[
           'Перелічити всі функції продукту підряд',
           'Показати цінність під конкретні потреби клієнта',
           'Запитати «коли оплачуєте?»',
           'Обійти запитання клієнта'
         ]},
-        // 9) Один вибір — як знизити недовіру
         { type:'single', text:'Клієнт висловлює недовіру. Що найкраще допомагає зменшити її?', options:[
           'Тиск «потрібно вирішити зараз»',
           'Особиста прозорість: розповідь про себе/команду/досвід і результати',
           'Ігнорування заперечення',
           'Термінова акція «лише сьогодні»'
         ]},
-        // 10) Відповідність — тембр голосу та ефект
         { type:'match', text:'Підберіть тембр голосу до ефекту', left:[
-          'Тихий',
-          'Середній',
-          'Гучний'
+          'Тихий','Середній','Гучний'
         ], right:[
           'Довіра, конфіденційність',
           'Нейтральний щоденний діалог',
@@ -197,13 +180,21 @@
       lockAndStart(email);
     });
 
-    function parseJwt(token){ const base64Url = token.split('.')[1]; const base64 = base64Url.replace(/-/g,'+').replace(/_/g,'/'); const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); return JSON.parse(json); }
+    function parseJwt(token){
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g,'+').replace(/_/g,'/');
+      const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(json);
+    }
 
     function lockAndStart(email){
       const existingEmail = localStorage.getItem(LS.email);
       const endTs = +localStorage.getItem(LS.end) || 0;
       const now = Date.now();
-      if(existingEmail && endTs && now < endTs && existingEmail !== email){ alert('Тест уже запущено під іншим аккаунтом і не може бути скинуто до завершення часу.'); return; }
+      if(existingEmail && endTs && now < endTs && existingEmail !== email){
+        alert('Тест уже запущено під іншим аккаунтом і не може бути скинуто до завершення часу.');
+        return;
+      }
       localStorage.setItem(LS.email, email);
       emailBadge.textContent = email; emailBadge.classList.remove('hidden');
       document.querySelector('.g_id_signin')?.classList.add('hidden');
@@ -242,11 +233,18 @@
     })();
 
     // -------- Рендер --------
-    function updateProgress(){ const total = order.length; statusEl.textContent = `Питання ${Math.min(idx+1,total)} із ${total}`; bar.style.width = `${(idx/total)*100}%`; }
+    function updateProgress(){
+      const total = order.length;
+      statusEl.textContent = `Питання ${Math.min(idx+1,total)} із ${total}`;
+      bar.style.width = `${(idx/total)*100}%`;
+    }
 
     function render(){
-      updateProgress(); nextBtn.disabled = true; stage.innerHTML = '';
+      updateProgress();
+      nextBtn.disabled = true;
+      stage.innerHTML = '';
       if(idx >= order.length){ return renderResult(); }
+
       const q = QUIZ.questions[order[idx]];
       const block = document.createElement('div');
       const h = document.createElement('h2'); h.className='q-title'; h.textContent = q.text; block.appendChild(h);
@@ -290,16 +288,14 @@
       if(q.type==='single'){
         options.addEventListener('change', ()=>{ nextBtn.disabled = !options.querySelector('input:checked'); });
       } else if(q.type==='multiple'){
-        options.addEventListener('change', ()=>{
-          const anyChecked = options.querySelectorAll('input:checked').length>0;
-          nextBtn.disabled = !anyChecked;
-        });
+        options.addEventListener('change', ()=>{ nextBtn.disabled = options.querySelectorAll('input:checked').length === 0; });
       } else {
-        // order / match — можна рухатися далі без дод. перевірок
-        nextBtn.disabled = false;
+        nextBtn.disabled = false; // order / match
       }
 
-      nextBtn.onclick = () => saveAndNext(); restartBtn.onclick = () => {};
+      nextBtn.onclick = () => saveAndNext();
+      restartBtn.onclick = () => {};
+
       function saveAndNext(){
         let picked;
         if(q.type==='single'){
@@ -309,23 +305,28 @@
         } else if(q.type==='order'){
           picked = Array.from(options.querySelectorAll('#orderList .draggable')).map(el=>el.textContent);
         } else if(q.type==='match'){
-          picked = {}; options.querySelectorAll('.slot').forEach(slot=>{ const l=slot.getAttribute('data-left'); const it=slot.querySelector('.draggable'); picked[l] = it ? it.getAttribute('data-right') : ''; });
+          picked = {}; options.querySelectorAll('.slot').forEach(slot=>{
+            const l=slot.getAttribute('data-left'); const it=slot.querySelector('.draggable');
+            picked[l] = it ? it.getAttribute('data-right') : '';
+          });
         }
         const record = { index: order[idx], type: q.type, picked };
-        answers[idx] = record; localStorage.setItem(LS.data, JSON.stringify(answers)); idx++; localStorage.setItem(LS.idx, String(idx)); render();
+        answers[idx] = record;
+        localStorage.setItem(LS.data, JSON.stringify(answers));
+        idx++; localStorage.setItem(LS.idx, String(idx));
+        render();
       }
     }
 
-    // -------- Результат (оцінка на сервері, ключі приховано) --------
+    // -------- Результат --------
     async function renderResult(){
       bar.style.width = '100%';
       const payload = buildPayload();
       stage.innerHTML = `<h2>Надсилання результату…</h2><div class="muted">Будь ласка, не закривайте сторінку.</div>`;
       try {
-        // простий запит без preflight → text/plain
         const rsp = await fetch(QUIZ.webhookUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // без preflight
           body: JSON.stringify(payload)
         });
         const data = await rsp.json();
@@ -343,7 +344,9 @@
           <div class="warning">Тест заблоковано — перезапуск неможливий до завершення таймера.</div>`;
         const rows = document.getElementById('rows');
         breakdown.forEach((b,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${b.id}</td><td>${b.ok?'<span class="pill ok">вірно</span>':'<span class="pill bad">помилка</span>'}</td>`; rows.appendChild(tr); });
-      } catch(err){ stage.innerHTML = `<h2>Не вдалося надіслати</h2><div class="muted">${err.message}</div><div class="warning">Зв’яжіться з керівником і повідомте про проблему.</div>`; }
+      } catch(err){
+        stage.innerHTML = `<h2>Не вдалося надіслати</h2><div class="muted">${err.message}</div><div class="warning">Зв’яжіться з керівником і повідомте про проблему.</div>`;
+      }
     }
 
     function buildPayload(){
@@ -351,6 +354,7 @@
       const startedAt = +localStorage.getItem(LS.start) || Date.now();
       const finishedAt = Date.now();
       const alpha = ['a','b','c','d','e','f'];
+
       const normalized = answers.map(rec=>{
         const q = QUIZ.questions[rec.index];
         if(rec.type==='single'){
@@ -358,7 +362,6 @@
           return { id:`q${rec.index+1}`, type:'single', value:letter };
         }
         if(rec.type==='multiple'){
-          // Надішлемо літери вибраних варіантів
           const letters = (rec.picked||[]).map(i=>alpha[i]);
           return { id:`q${rec.index+1}`, type:'multiple', value:letters };
         }
@@ -370,12 +373,28 @@
         }
         return { id:`q${rec.index+1}`, type:rec.type, value:rec.picked };
       });
+
       return { title:QUIZ.title, email, startedAt, finishedAt, durationMin:QUIZ.durationMin, answers:normalized, ua:navigator.userAgent };
     }
 
     // -------- Таймер --------
-    function tickTimer(){ const end = +localStorage.getItem(LS.end) || 0; if(!end) return; const left = Math.max(0, end - Date.now()); const mm = String(Math.floor(left/60000)).padStart(2,'0'); const ss = String(Math.floor((left%60000)/1000)).padStart(2,'0'); timerEl.textContent = `${mm}:${ss}`; if(left<=0){ idx = order.length; localStorage.setItem(LS.idx, String(idx)); render(); return; } setTimeout(tickTimer, 250); }
-    function timeTaken(){ const start = +localStorage.getItem(LS.start) || Date.now(); const s = Math.max(0, Math.floor((Date.now()-start)/1000)); const mm = String(Math.floor(s/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0'); return `${mm}:${ss}`; }
+    function tickTimer(){
+      const end = +localStorage.getItem(LS.end) || 0;
+      if(!end) return;
+      const left = Math.max(0, end - Date.now());
+      const mm = String(Math.floor(left/60000)).padStart(2,'0');
+      const ss = String(Math.floor((left%60000)/1000)).padStart(2,'0');
+      timerEl.textContent = `${mm}:${ss}`;
+      if(left<=0){ idx = order.length; localStorage.setItem(LS.idx, String(idx)); render(); return; }
+      setTimeout(tickTimer, 250);
+    }
+    function timeTaken(){
+      const start = +localStorage.getItem(LS.start) || Date.now();
+      const s = Math.max(0, Math.floor((Date.now()-start)/1000));
+      const mm = String(Math.floor(s/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      return `${mm}:${ss}`;
+    }
   </script>
 </body>
 </html>
